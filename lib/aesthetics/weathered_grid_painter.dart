@@ -15,7 +15,7 @@ class WeatheredGridPainter extends CustomPainter {
 
     const gridSize = 150.0;
     const lineWidth = 1.0;
-    const double alpha = 30;
+    const double alpha = 15;
 
     final gridPaint = Paint()
       ..strokeWidth = lineWidth
@@ -69,7 +69,9 @@ class WeatheredGridPainter extends CustomPainter {
 
     // Add subtle noise/grain for extra weathered effect
     const noiseSize = 2.0;
-    final noisePaint = Paint()..color = Colors.white.withOpacity(0.02);
+    // Avoid deprecated withOpacity; use Color.fromRGBO to set alpha precisely
+    final noisePaint = Paint()
+      ..color = const Color.fromRGBO(255, 255, 255, 0.02);
     for (int i = 0; i < 200; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;

@@ -1,0 +1,280 @@
+name: Release on Version Change
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pubspec.yaml'
+
+jobs:
+  check-version-change:
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      new_version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if version changed
+        id: check
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Get previous version
+          git checkout HEAD^1
+          PREVIOUS_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          git checkout -
+          echo "Previous version: $PREVIOUS_VERSION"
+          
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "Version unchanged"
+          fi
+
+  build-android:
+    needs: check-version-change
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+
+  build-windows:
+    needs: check-version-change
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Create Windows Archive
+        run: |
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath build\windows\ui_gen_demo-windows.zip
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: build\windows\ui_gen_demo-windows.zip
+
+  build-web:
+    needs: check-version-change
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Web
+        run: flutter build web --release --base-href /${{ github.event.repository.name }}/
+
+      - name: Upload Web Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release
+          path: build/web/
+
+  deploy-github-pages:
+    needs: [check-version-change, build-web]
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-release
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          publish_branch: gh-pages
+          force_orphan: true
+
+  # Placeholder for Firebase deployment
+  # INSTRUCTIONS TO ENABLE FIREBASE HOSTING:
+  # 1. Run 'firebase init hosting' in your project
+  # 2. Create a Firebase project at https://console.firebase.google.com
+  # 3. Generate a Firebase token: firebase login:ci
+  # 4. Add the token as a GitHub secret named FIREBASE_TOKEN
+  # 5. Uncomment the job below
+  
+  # deploy-firebase:
+  #   needs: [check-version-change, build-web]
+  #   if: needs.check-version-change.outputs.version_changed == 'true'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Download Web Build
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: web-release
+  #         path: build/web
+  #
+  #     - name: Deploy to Firebase Hosting
+  #       uses: FirebaseExtended/action-hosting-deploy@v0
+  #       with:
+  #         repoToken: '${{ secrets.GITHUB_TOKEN }}'
+  #         firebaseServiceAccount: '${{ secrets.FIREBASE_TOKEN }}'
+  #         channelId: live
+  #         projectId: your-firebase-project-id  # Replace with your Firebase project ID
+
+  create-release:
+    needs: [check-version-change, build-android, build-windows, deploy-github-pages]
+    if: needs.check-version-change.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: artifacts/
+
+      - name: Download Android App Bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: android-aab
+          path: artifacts/
+
+      - name: Download Windows Build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release
+          path: artifacts/
+
+      - name: Install yq (YAML parser)
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Extract changelog for current version
+        id: changelog
+        run: |
+          VERSION="${{ needs.check-version-change.outputs.new_version }}"
+          
+          # Extract changelog for this version
+          CHANGELOG=$(yq eval ".versions[] | select(.version == \"$VERSION\") | .changes | .[]" CHANGELOG.yaml | sed 's/^/- /')
+          
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="No changelog entries found for version $VERSION"
+          fi
+          
+          # Create release notes
+          cat > release_notes.md << EOF
+          # Release v$VERSION
+          
+          ## What's New
+          $CHANGELOG
+          
+          ## Downloads
+          - **Android APK**: Suitable for direct installation on Android devices
+          - **Android App Bundle**: For Google Play Store submission
+          - **Windows**: Portable Windows application (extract and run)
+          - **Web**: Available at https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          
+          ## Firebase Hosting
+          <!-- Firebase deployment will be available once configured -->
+          EOF
+          
+          echo "Release notes created"
+          cat release_notes.md
+
+      - name: Rename artifacts
+        run: |
+          VERSION="${{ needs.check-version-change.outputs.new_version }}"
+          mv artifacts/app-release.apk artifacts/ui_gen_demo-v$VERSION-android.apk
+          mv artifacts/app-release.aab artifacts/ui_gen_demo-v$VERSION-android.aab
+          mv artifacts/ui_gen_demo-windows.zip artifacts/ui_gen_demo-v$VERSION-windows.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.check-version-change.outputs.new_version }}
+          name: Release v${{ needs.check-version-change.outputs.new_version }}
+          body_path: release_notes.md
+          files: |
+            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-android.apk
+            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-android.aab
+            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-windows.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

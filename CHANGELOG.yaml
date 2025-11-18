@@ -1,0 +1,18 @@
+# CHANGELOG
+# Format: YAML for easy parsing by CI/CD tools
+# Each version should have: version, date, and changes (list)
+
+versions:
+  - version: 0.1.1
+    date: 2025-11-18
+    changes:
+      - Reduced grid line alpha in WeatheredGridPainter for a subtler effect
+      - Replaced deprecated withOpacity method with Color.fromRGBO for noise paint
+      - Added animations to drawer navigation
+  - version: 0.1.0
+    date: 2025-11-18
+    changes:
+      - Initial release
+      - Basic UI implementation
+      - Drawer navigation
+      - Chat view functionality

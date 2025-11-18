@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:ui_gen_demo/pages/drawer_view.dart';
 import 'package:ui_gen_demo/aesthetics/weathered_grid_painter.dart';
@@ -31,7 +32,7 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
     super.initState();
     _focusNode.requestFocus();
 
-    // Initialize animation controller
+    // Initialize animation controller for border radius
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 100),
@@ -47,7 +48,7 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
   }
 
   void _onDrawerChanged() {
-    // This is a backup listener in case the drawer state changes externally
+    // Backup listener in case the drawer state changes externally
     if (_advancedDrawerController.value.visible) {
       _animationController.forward();
     } else {
@@ -106,8 +107,20 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
         openRatio: isMobile ? 0.975 : 0.75,
         animationCurve: Curves.easeInOutCubic,
         controller: _advancedDrawerController,
-        animationDuration: Duration(milliseconds: 300),
-        drawer: DrawerView(drawerController: _advancedDrawerController),
+        animationDuration: const Duration(milliseconds: 300),
+        // Drawer content: simple fade-in and slide-up using flutter_animate
+        drawer: DrawerView(drawerController: _advancedDrawerController)
+            .animate()
+            .fadeIn(
+              duration: const Duration(milliseconds: 300),
+              delay: const Duration(milliseconds: 100),
+            )
+            .slideY(
+              begin: 1.0,
+              duration: const Duration(milliseconds: 300),
+              delay: const Duration(milliseconds: 100),
+              curve: Curves.easeOutCubic,
+            ),
         child: AnimatedBuilder(
           animation: _borderRadiusAnimation,
           builder: (context, child) {
@@ -117,7 +130,7 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
                 borderRadius: BorderRadius.circular(
                   _borderRadiusAnimation.value,
                 ),
-                side: BorderSide(width: 1),
+                side: const BorderSide(width: 1),
               ),
               child: child!,
             );

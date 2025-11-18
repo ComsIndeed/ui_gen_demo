@@ -1,7 +1,7 @@
 name: ui_gen_demo
-description: "A new Flutter project."
+description: "Generative UI demo app using Flutter"
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.1
 
 environment:
   sdk: ^3.9.2
@@ -12,6 +12,7 @@ dependencies:
   flutter_advanced_drawer: ^1.5.0
   flutter_animate: ^4.5.2
   flutter_bloc: ^9.1.1
+  google_fonts: ^6.3.2
   llm_json_stream: ^0.2.1
   provider: ^6.1.5+1
   responsive_framework: ^1.5.1
