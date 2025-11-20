@@ -20,21 +20,36 @@ class AnimatedDrawerWrapper extends StatefulWidget {
   }
 }
 
-class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper> {
+class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
+    with TickerProviderStateMixin {
   final _advancedDrawerController = AdvancedDrawerController();
   final FocusNode _focusNode = FocusNode();
+  late AnimationController _shockwaveController;
 
   @override
   void initState() {
     super.initState();
     _focusNode.requestFocus();
-    // No animations: nothing to initialize here
+
+    // Initialize shockwave animation controller
+    _shockwaveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    // Listen to drawer state and trigger shockwave when opening
+    _advancedDrawerController.addListener(() {
+      if (_advancedDrawerController.value.visible) {
+        _shockwaveController.forward(from: 0.0);
+      }
+    });
   }
 
   @override
   void dispose() {
     _advancedDrawerController.dispose();
     _focusNode.dispose();
+    _shockwaveController.dispose();
     super.dispose();
   }
 
@@ -58,9 +73,16 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper> {
         childDecoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
         backdrop: Container(
           decoration: const BoxDecoration(color: Colors.black),
-          child: CustomPaint(
-            painter: WeatheredGridPainter(),
-            size: Size.infinite,
+          child: AnimatedBuilder(
+            animation: _shockwaveController,
+            builder: (context, child) {
+              return CustomPaint(
+                painter: WeatheredGridPainter(
+                  animationProgress: _shockwaveController.value,
+                ),
+                size: Size.infinite,
+              );
+            },
           ),
         ),
         openScale: 0.97,

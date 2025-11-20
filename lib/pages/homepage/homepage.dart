@@ -21,7 +21,16 @@ class Homepage extends StatelessWidget {
           ],
         ),
       ),
-      body: const Center(child: Text('Homepage Content')),
+      body: Center(
+        child: Column(
+          children: [
+            Text(
+              'Riverstream',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

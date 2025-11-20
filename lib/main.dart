@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:ui_gen_demo/blocs/chat_view_bloc/chat_view_bloc.dart';
 import 'package:ui_gen_demo/pages/homepage/homepage.dart';
 import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dart';
 import 'package:ui_gen_demo/pages/settings_page/settings_page.dart';
+import 'package:ui_gen_demo/services/chat_view_provider.dart';
 import 'package:ui_gen_demo/services/widget_service.dart';
 
 void main() async {
@@ -19,9 +18,9 @@ void main() async {
   }
 
   runApp(
-    MultiBlocProvider(
+    MultiProvider(
       providers: [
-        BlocProvider<ChatViewBloc>(create: (_) => ChatViewBloc()),
+        ChangeNotifierProvider(create: (_) => ChatViewProvider()),
         ChangeNotifierProvider(create: (_) => WidgetService()),
       ],
       child: const MainApp(),

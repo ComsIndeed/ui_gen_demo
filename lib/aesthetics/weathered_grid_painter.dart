@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 
 /// Custom painter for weathered grid pattern backdrop
 class WeatheredGridPainter extends CustomPainter {
+  final double animationProgress; // 0 to 1, for shockwave effect
   final math.Random random = math.Random(42); // Fixed seed for consistency
+
+  WeatheredGridPainter({this.animationProgress = 0.0});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -17,6 +20,15 @@ class WeatheredGridPainter extends CustomPainter {
     const lineWidth = 1.0;
     const double alpha = 15;
 
+    // Shockwave properties
+    final center = Offset(
+      size.width * 0.3,
+      size.height * 0.5,
+    ); // Start from left-center
+    final maxRadius = size.width * 1.5; // Ensure it covers entire canvas
+    final currentRadius = animationProgress * maxRadius;
+    const shockwaveWidth = 300.0; // Width of the shockwave band
+
     final gridPaint = Paint()
       ..strokeWidth = lineWidth
       ..color = Colors.lightGreenAccent.withAlpha(40);
@@ -27,8 +39,20 @@ class WeatheredGridPainter extends CustomPainter {
       if (random.nextDouble() > 0.15) {
         // Further random opacity variation for worn appearance
         final opacityVariation = 0.5 + (random.nextDouble() * 0.5);
-        gridPaint.color = Colors.white.withAlpha(
-          (alpha * opacityVariation).toInt(),
+
+        // Calculate shockwave intensity at this x position
+        final distanceFromCenter =
+            (center - Offset(x, size.height / 2)).distance;
+        final radiusDiff = (distanceFromCenter - currentRadius).abs();
+        final shockwaveIntensity = radiusDiff < shockwaveWidth
+            ? (1.0 - (radiusDiff / shockwaveWidth)) * animationProgress
+            : 0.0;
+
+        // Apply shockwave brightness boost
+        final finalAlpha =
+            alpha * opacityVariation + (shockwaveIntensity * 120);
+        gridPaint.color = Colors.lightGreenAccent.withAlpha(
+          finalAlpha.clamp(0, 255).toInt(),
         );
 
         // Occasionally draw broken/partial lines
@@ -50,8 +74,20 @@ class WeatheredGridPainter extends CustomPainter {
       if (random.nextDouble() > 0.15) {
         // Further random opacity variation for worn appearance
         final opacityVariation = 0.5 + (random.nextDouble() * 0.5);
-        gridPaint.color = Colors.white.withAlpha(
-          (alpha * opacityVariation).toInt(),
+
+        // Calculate shockwave intensity at this y position
+        final distanceFromCenter =
+            (center - Offset(size.width / 2, y)).distance;
+        final radiusDiff = (distanceFromCenter - currentRadius).abs();
+        final shockwaveIntensity = radiusDiff < shockwaveWidth
+            ? (1.0 - (radiusDiff / shockwaveWidth)) * animationProgress
+            : 0.0;
+
+        // Apply shockwave brightness boost
+        final finalAlpha =
+            alpha * opacityVariation + (shockwaveIntensity * 120);
+        gridPaint.color = Colors.lightGreenAccent.withAlpha(
+          finalAlpha.clamp(0, 255).toInt(),
         );
 
         // Occasionally draw broken/partial lines
@@ -80,5 +116,6 @@ class WeatheredGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(WeatheredGridPainter oldDelegate) => false;
+  bool shouldRepaint(WeatheredGridPainter oldDelegate) =>
+      oldDelegate.animationProgress != animationProgress;
 }
