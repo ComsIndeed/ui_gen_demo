@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:ui_gen_demo/blocs/chat_view_bloc/chat_view_bloc.dart';
-import 'package:ui_gen_demo/pages/homepage.dart';
-import 'package:ui_gen_demo/pages/animated_drawer_wrapper.dart';
+import 'package:ui_gen_demo/pages/homepage/homepage.dart';
+import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dart';
+import 'package:ui_gen_demo/pages/settings_page/settings_page.dart';
 import 'package:ui_gen_demo/services/widget_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await FlutterDisplayMode.setHighRefreshRate();
+  } catch (e) {
+    // Fail gracefully
+  }
 
   runApp(
     MultiBlocProvider(
@@ -30,7 +38,11 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData.dark(),
-      home: const AnimatedDrawerWrapper(child: Homepage()),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AnimatedDrawerWrapper(child: Homepage()),
+        '/settings': (context) => const SettingsPage(),
+      },
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
         breakpoints: [

@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:ui_gen_demo/pages/animated_drawer_wrapper.dart';
+import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dart';
 
 class Homepage extends StatelessWidget {
   const Homepage({super.key});

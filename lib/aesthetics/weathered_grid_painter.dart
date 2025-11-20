@@ -19,7 +19,7 @@ class WeatheredGridPainter extends CustomPainter {
 
     final gridPaint = Paint()
       ..strokeWidth = lineWidth
-      ..color = Colors.white.withAlpha(20);
+      ..color = Colors.lightGreenAccent.withAlpha(40);
 
     // Draw vertical lines
     for (double x = 0; x <= size.width; x += gridSize) {
