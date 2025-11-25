@@ -25,6 +25,9 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
   final _advancedDrawerController = AdvancedDrawerController();
   final FocusNode _focusNode = FocusNode();
   late AnimationController _shockwaveController;
+  late AnimationController _flickerController;
+  late AnimationController _flickerDecayController;
+  bool _isDrawerVisible = false;
 
   @override
   void initState() {
@@ -37,11 +40,39 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
       duration: const Duration(milliseconds: 800),
     );
 
-    // Listen to drawer state and trigger shockwave when opening
+    // Initialize flicker animation controller - continuous loop
+    _flickerController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2), // Shorter for faster cycling
+    );
+
+    // Initialize flicker decay controller - fades out the flicker effect
+    _flickerDecayController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500), // Quick half-second decay
+    );
+
+    // Listen to drawer state and trigger animations when opening
     _advancedDrawerController.addListener(() {
-      if (_advancedDrawerController.value.visible) {
+      final visible = _advancedDrawerController.value.visible;
+      if (visible && !_isDrawerVisible) {
+        // Drawer is opening
         _shockwaveController.forward(from: 0.0);
+        _flickerController.repeat();
+        _flickerDecayController.forward(
+          from: 0.0,
+        ); // Start decay from full intensity
+      } else if (!visible && _isDrawerVisible) {
+        // Drawer is closing - immediately stop and reset everything
+        _shockwaveController.stop();
+        _shockwaveController.reset();
+        _flickerController.stop();
+        _flickerController.reset();
+        _flickerDecayController.stop();
+        _flickerDecayController.value =
+            1.0; // Set to fully decayed (no flicker)
       }
+      _isDrawerVisible = visible;
     });
   }
 
@@ -50,6 +81,8 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
     _advancedDrawerController.dispose();
     _focusNode.dispose();
     _shockwaveController.dispose();
+    _flickerController.dispose();
+    _flickerDecayController.dispose();
     super.dispose();
   }
 
@@ -74,11 +107,20 @@ class AnimatedDrawerWrapperState extends State<AnimatedDrawerWrapper>
         backdrop: Container(
           decoration: const BoxDecoration(color: Colors.black),
           child: AnimatedBuilder(
-            animation: _shockwaveController,
+            animation: Listenable.merge([
+              _shockwaveController,
+              _flickerController,
+              _flickerDecayController,
+            ]),
             builder: (context, child) {
+              // Decay goes from 1.0 (full flicker) to 0.0 (no flicker)
+              final flickerIntensity = 1.0 - _flickerDecayController.value;
               return CustomPaint(
                 painter: WeatheredGridPainter(
                   animationProgress: _shockwaveController.value,
+                  flickerTime:
+                      _flickerController.value * 50, // Much faster flicker rate
+                  flickerIntensity: flickerIntensity,
                 ),
                 size: Size.infinite,
               );
