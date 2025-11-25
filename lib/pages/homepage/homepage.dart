@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:ui_gen_demo/constants/app_constants.dart';
 import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dart';
 
 class Homepage extends StatelessWidget {
@@ -25,7 +26,7 @@ class Homepage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'Riverstream',
+              AppConstants.appTitle,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:ui_gen_demo/constants/app_constants.dart';
 import 'package:ui_gen_demo/services/chat_view_provider.dart';
 import 'package:ui_gen_demo/services/ai_service.dart';
 
@@ -79,7 +80,7 @@ class _DrawerViewState extends State<DrawerView> {
                 Row(
                   children: [
                     Text(
-                      "Riverstream",
+                      AppConstants.appTitle,
                       style: GoogleFonts.roboto(
                         fontSize: 32,
                         color: Colors.white,
