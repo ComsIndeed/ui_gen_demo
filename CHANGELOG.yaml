@@ -3,6 +3,14 @@
 # Each version should have: version, date, and changes (list)
 
 versions:
+  - version: 0.1.2
+    date: 2025-11-18
+    changes:
+      - Fixed issue with changelog extraction in release workflow
+      - Updated GitHub Actions workflow for better artifact handling
+      - Added cool background animations in the opening of drawer
+      - You can now message the models in chat view but its still buggy
+      - Refactored some code
   - version: 0.1.1
     date: 2025-11-18
     changes:
