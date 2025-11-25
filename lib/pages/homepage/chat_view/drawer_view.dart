@@ -88,6 +88,11 @@ class _DrawerViewState extends State<DrawerView> {
                     Spacer(),
                     IconButton(
                       onPressed: () =>
+                          Navigator.pushNamed(context, '/widget_catalog'),
+                      icon: Icon(Icons.list_alt),
+                    ),
+                    IconButton(
+                      onPressed: () =>
                           Navigator.pushNamed(context, '/settings'),
                       icon: Icon(Icons.settings),
                     ),
