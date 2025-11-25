@@ -17,20 +17,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Check if version changed
         id: check
         run: |
-          # Get current version
-          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          # Get current version (strip any build number after +)
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//' | tr -d '[:space:]')
           echo "Current version: $CURRENT_VERSION"
           
-          # Get previous version
-          git checkout HEAD^1
-          PREVIOUS_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
-          git checkout -
-          echo "Previous version: $PREVIOUS_VERSION"
+          # Check if there's a previous commit
+          if git rev-parse HEAD^1 >/dev/null 2>&1; then
+            # Get previous version
+            PREVIOUS_VERSION=$(git show HEAD^1:pubspec.yaml | grep '^version:' | sed 's/version: //' | sed 's/+.*//' | tr -d '[:space:]')
+            echo "Previous version: $PREVIOUS_VERSION"
+          else
+            # First commit, no previous version
+            PREVIOUS_VERSION=""
+            echo "No previous commit found (first commit)"
+          fi
           
           if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -67,20 +72,11 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Build App Bundle
-        run: flutter build appbundle --release
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-
-      - name: Upload App Bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-aab
-          path: build/app/outputs/bundle/release/app-release.aab
 
   build-windows:
     needs: check-version-change
@@ -144,6 +140,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pages: write
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -155,45 +153,15 @@ jobs:
           path: build/web
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
           publish_branch: gh-pages
           force_orphan: true
 
-  # Placeholder for Firebase deployment
-  # INSTRUCTIONS TO ENABLE FIREBASE HOSTING:
-  # 1. Run 'firebase init hosting' in your project
-  # 2. Create a Firebase project at https://console.firebase.google.com
-  # 3. Generate a Firebase token: firebase login:ci
-  # 4. Add the token as a GitHub secret named FIREBASE_TOKEN
-  # 5. Uncomment the job below
-  
-  # deploy-firebase:
-  #   needs: [check-version-change, build-web]
-  #   if: needs.check-version-change.outputs.version_changed == 'true'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Download Web Build
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: web-release
-  #         path: build/web
-  #
-  #     - name: Deploy to Firebase Hosting
-  #       uses: FirebaseExtended/action-hosting-deploy@v0
-  #       with:
-  #         repoToken: '${{ secrets.GITHUB_TOKEN }}'
-  #         firebaseServiceAccount: '${{ secrets.FIREBASE_TOKEN }}'
-  #         channelId: live
-  #         projectId: your-firebase-project-id  # Replace with your Firebase project ID
-
   create-release:
-    needs: [check-version-change, build-android, build-windows, deploy-github-pages]
+    needs: [check-version-change, build-android, build-windows, build-web, deploy-github-pages]
     if: needs.check-version-change.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -208,72 +176,109 @@ jobs:
           name: android-apk
           path: artifacts/
 
-      - name: Download Android App Bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: android-aab
-          path: artifacts/
-
       - name: Download Windows Build
         uses: actions/download-artifact@v4
         with:
           name: windows-release
           path: artifacts/
 
-      - name: Install yq (YAML parser)
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-release
+          path: artifacts/web/
 
-      - name: Extract changelog for current version
-        id: changelog
-        run: |
-          VERSION="${{ needs.check-version-change.outputs.new_version }}"
-          
-          # Extract changelog for this version
-          CHANGELOG=$(yq eval ".versions[] | select(.version == \"$VERSION\") | .changes | .[]" CHANGELOG.yaml | sed 's/^/- /')
-          
-          if [ -z "$CHANGELOG" ]; then
-            CHANGELOG="No changelog entries found for version $VERSION"
-          fi
-          
-          # Create release notes
-          cat > release_notes.md << EOF
-          # Release v$VERSION
-          
-          ## What's New
-          $CHANGELOG
-          
-          ## Downloads
-          - **Android APK**: Suitable for direct installation on Android devices
-          - **Android App Bundle**: For Google Play Store submission
-          - **Windows**: Portable Windows application (extract and run)
-          - **Web**: Available at https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
-          
-          ## Firebase Hosting
-          <!-- Firebase deployment will be available once configured -->
-          EOF
-          
-          echo "Release notes created"
-          cat release_notes.md
-
-      - name: Rename artifacts
+      - name: Rename and prepare artifacts
         run: |
           VERSION="${{ needs.check-version-change.outputs.new_version }}"
           mv artifacts/app-release.apk artifacts/ui_gen_demo-v$VERSION-android.apk
-          mv artifacts/app-release.aab artifacts/ui_gen_demo-v$VERSION-android.aab
           mv artifacts/ui_gen_demo-windows.zip artifacts/ui_gen_demo-v$VERSION-windows.zip
+          cd artifacts && zip -r ui_gen_demo-v$VERSION-web.zip web/ && rm -rf web/
+
+      - name: Generate checksums
+        run: |
+          VERSION="${{ needs.check-version-change.outputs.new_version }}"
+          cd artifacts
+          sha256sum ui_gen_demo-v$VERSION-android.apk > ui_gen_demo-v$VERSION-android.apk.sha256
+          sha256sum ui_gen_demo-v$VERSION-windows.zip > ui_gen_demo-v$VERSION-windows.zip.sha256
+          sha256sum ui_gen_demo-v$VERSION-web.zip > ui_gen_demo-v$VERSION-web.zip.sha256
+          
+          # Create combined checksums file
+          cat *.sha256 > CHECKSUMS.txt
+          echo "Generated checksums:"
+          cat CHECKSUMS.txt
+
+      - name: Extract changelog (optional)
+        id: changelog
+        run: |
+          VERSION="${{ needs.check-version-change.outputs.new_version }}"
+          CHANGELOG=""
+          
+          # Check if CHANGELOG.yaml exists and try to extract changes
+          if [ -f "CHANGELOG.yaml" ]; then
+            # Install yq
+            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+            
+            # Try to extract changelog, ignore errors
+            CHANGELOG=$(yq eval ".versions[] | select(.version == \"$VERSION\") | .changes | .[]" CHANGELOG.yaml 2>/dev/null | sed 's/^/- /' || echo "")
+          fi
+          
+          # Create release notes
+          if [ -n "$CHANGELOG" ]; then
+            cat > release_notes.md << EOF
+          ## What's New
+          $CHANGELOG
+
+          EOF
+          else
+            cat > release_notes.md << EOF
+          ## What's New
+          - Version $VERSION release
+
+          EOF
+          fi
+          
+          # Add download info and checksums
+          cat >> release_notes.md << EOF
+          ## Downloads
+          | Platform | File | Description |
+          |----------|------|-------------|
+          | Android | \`ui_gen_demo-v$VERSION-android.apk\` | Direct install APK |
+          | Windows | \`ui_gen_demo-v$VERSION-windows.zip\` | Portable Windows app (extract and run) |
+          | Web | \`ui_gen_demo-v$VERSION-web.zip\` | Web build archive |
+
+          ## Live Web App
+          🌐 **Try it now**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+
+          ## Checksums (SHA256)
+          Verify your download integrity with these checksums:
+          \`\`\`
+          $(cat artifacts/CHECKSUMS.txt)
+          \`\`\`
+
+          ## How to Verify
+          - **Linux/macOS**: \`sha256sum -c <filename>.sha256\`
+          - **Windows PowerShell**: \`Get-FileHash <filename> -Algorithm SHA256\`
+          EOF
+          
+          echo "Release notes created:"
+          cat release_notes.md
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.check-version-change.outputs.new_version }}
           name: Release v${{ needs.check-version-change.outputs.new_version }}
           body_path: release_notes.md
           files: |
             artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-android.apk
-            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-android.aab
+            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-android.apk.sha256
             artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-windows.zip
+            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-windows.zip.sha256
+            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-web.zip
+            artifacts/ui_gen_demo-v${{ needs.check-version-change.outputs.new_version }}-web.zip.sha256
+            artifacts/CHECKSUMS.txt
           draft: false
           prerelease: false
         env:
