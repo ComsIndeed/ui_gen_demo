@@ -7,7 +7,7 @@ import 'package:llm_json_stream/json_stream_parser.dart';
 import 'package:ui_gen_demo/pages/homepage/chat_view/message_box.dart';
 import 'package:ui_gen_demo/widgets/accumulating_stream_builder.dart';
 
-/// The service for creating the widgets displayed per LLM messages
+/// The service for constructing message widgets from LLM JSON responses
 class LLMMessageService extends ChangeNotifier {
   // ignore: non_constant_identifier_names
   static String get WIDGET_GENERATION_PROMPT => '''

@@ -7,7 +7,6 @@ import 'package:ui_gen_demo/pages/homepage/homepage.dart';
 import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dart';
 import 'package:ui_gen_demo/pages/settings_page/settings_page.dart';
 import 'package:ui_gen_demo/services/chat_view_provider.dart';
-import 'package:ui_gen_demo/services/widget_service.dart';
 
 import 'package:ui_gen_demo/pages/widget_catalog_page/widget_catalog_page.dart';
 
@@ -22,10 +21,7 @@ void main() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ChatViewProvider()),
-        ChangeNotifierProvider(create: (_) => WidgetService()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => ChatViewProvider())],
       child: const MainApp(),
     ),
   );

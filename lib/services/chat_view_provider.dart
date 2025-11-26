@@ -3,6 +3,9 @@ import 'package:ui_gen_demo/pages/homepage/chat_view/message_box.dart';
 import 'package:ui_gen_demo/services/ai_service.dart';
 import 'package:ui_gen_demo/services/llm_message_service.dart';
 
+/// Gives the actual chat message widgets for the chat view
+/// - Uses [AiService] to send messages to the AI
+/// - Uses [LLMMessageService] to create message widgets from the AI responses
 class ChatViewProvider with ChangeNotifier {
   final _aiService = AiService();
   final LLMMessageService _llmMessageService = LLMMessageService();

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ui_gen_demo/widgets/generative_widgets/generative_button.dart';
-import 'package:ui_gen_demo/widgets/generative_widgets/generative_column.dart';
-import 'package:ui_gen_demo/widgets/generative_widgets/generative_row.dart';
-import 'package:ui_gen_demo/widgets/generative_widgets/generative_text.dart';
-import 'package:ui_gen_demo/widgets/generative_widgets/generative_textfield.dart';
-import 'package:ui_gen_demo/widgets/generative_widgets/generative_widget_info.dart';
+import 'package:ui_gen_demo/modules/streaming_ui_engine/generative_widgets/generative_button.dart';
+import 'package:ui_gen_demo/modules/streaming_ui_engine/generative_widgets/generative_column.dart';
+import 'package:ui_gen_demo/modules/streaming_ui_engine/generative_widgets/generative_row.dart';
+import 'package:ui_gen_demo/modules/streaming_ui_engine/generative_widgets/generative_text.dart';
+import 'package:ui_gen_demo/modules/streaming_ui_engine/generative_widgets/generative_textfield.dart';
+import 'package:ui_gen_demo/modules/streaming_ui_engine/generative_widgets/generative_widget_info.dart';
 
 class WidgetCatalogPage extends StatelessWidget {
   const WidgetCatalogPage({super.key});

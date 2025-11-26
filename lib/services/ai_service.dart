@@ -3,6 +3,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+/// For managing AI interactions using Google Generative AI and Groq AI APIs.
 class AiService {
   static const _storage = FlutterSecureStorage();
   static const _apiKeyKey = 'gemini_api_key';
