@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:ui_gen_demo/widgets/accumulating_stream_builder.dart';
 
-import 'generative_widget_info.dart';
+import 'streaming_widget_info.dart';
 
-class GenerativeText extends StatelessWidget {
+class StreamingText extends StatelessWidget {
   final Stream<String> displayText;
 
-  GenerativeText({super.key, String? fullJson, Stream<String>? displayText})
+  StreamingText({super.key, String? fullJson, Stream<String>? displayText})
     : displayText = _resolveStringStream(
         fullJson,
         displayText,
@@ -44,7 +44,7 @@ class GenerativeText extends StatelessWidget {
     return stream ?? Stream.value(defaultValue);
   }
 
-  static final info = GenerativeWidgetInfo(
+  static final info = StreamingWidgetInfo(
     title: 'Markdown Text',
     purpose:
         'Markdown text display component. Supports markdown features like headings, bold, italic, lists, code blocks, and links.',
@@ -53,7 +53,7 @@ class GenerativeText extends StatelessWidget {
     },
     exampleJson:
         '{"displayText": "# Welcome\\n\\nThis is **bold** and *italic* text.\\n\\n- Item 1\\n- Item 2"}',
-    builder: (context) => GenerativeText(
+    builder: (context) => StreamingText(
       displayText: Stream.value(
         '# Welcome\n\nThis is **bold** and *italic* text.',
       ),
@@ -99,28 +99,13 @@ class GenerativeText extends StatelessWidget {
                 backgroundColor: Theme.of(
                   context,
                 ).colorScheme.surfaceContainerHighest,
-                color: Theme.of(context).colorScheme.primary,
                 fontFamily: 'monospace',
                 fontSize: 14,
               ),
-              codeblockDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
               blockquote: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 16,
                 fontStyle: FontStyle.italic,
-              ),
-              blockquoteDecoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 4,
-                  ),
-                ),
-              ),
-              listBullet: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

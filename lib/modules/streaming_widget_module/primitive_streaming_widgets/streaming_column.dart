@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-import 'generative_widget_info.dart';
+import 'streaming_widget_info.dart';
 
-class GenerativeColumn extends StatelessWidget {
+class StreamingColumn extends StatelessWidget {
   final dynamic itemComponents; // TODO: Change to MapPropertyStream (array)
   final Stream<double> gapNumber;
 
-  GenerativeColumn({
+  StreamingColumn({
     super.key,
     String? fullJson,
     this.itemComponents,
@@ -44,7 +44,7 @@ class GenerativeColumn extends StatelessWidget {
     return stream ?? Stream.value(defaultValue);
   }
 
-  static final info = GenerativeWidgetInfo(
+  static final info = StreamingWidgetInfo(
     title: 'Column Layout',
     purpose:
         'Vertical layout stack component. Use for stacking content vertically like lists, forms, or sequential information.',
@@ -54,8 +54,8 @@ class GenerativeColumn extends StatelessWidget {
       'gapNumber': 'Number - Spacing between items in pixels',
     },
     exampleJson:
-        '{"itemComponents": [{"type": "GenerativeText", "displayText": "Item 1"}, {"type": "GenerativeText", "displayText": "Item 2"}], "gapNumber": 16}',
-    builder: (context) => GenerativeColumn(
+        '{"itemComponents": [{"type": "StreamingText", "displayText": "Item 1"}, {"type": "StreamingText", "displayText": "Item 2"}], "gapNumber": 16}',
+    builder: (context) => StreamingColumn(
       gapNumber: Stream.value(16.0),
       // Placeholder for visual representation
     ),

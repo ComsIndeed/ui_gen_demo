@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 
-class GenerativeWidgetInfo {
+class StreamingWidgetInfo {
   final String title;
   final String purpose;
   final Map<String, String> schema;
   final String exampleJson;
   final WidgetBuilder builder;
 
-  const GenerativeWidgetInfo({
+  const StreamingWidgetInfo({
     required this.title,
     required this.purpose,
     required this.schema,

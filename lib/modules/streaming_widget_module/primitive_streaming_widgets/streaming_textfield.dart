@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:ui_gen_demo/widgets/accumulating_stream_builder.dart';
 
-import 'generative_widget_info.dart';
+import 'streaming_widget_info.dart';
 
-class GenerativeTextField extends StatelessWidget {
+class StreamingTextField extends StatelessWidget {
   final Stream<String> labelText;
   final Stream<String> hintText;
 
-  GenerativeTextField({
+  StreamingTextField({
     super.key,
     String? fullJson,
     Stream<String>? labelText,
@@ -56,7 +56,7 @@ class GenerativeTextField extends StatelessWidget {
     return stream ?? Stream.value(defaultValue);
   }
 
-  static final info = GenerativeWidgetInfo(
+  static final info = StreamingWidgetInfo(
     title: 'Text Field',
     purpose:
         'Text input field component. Use for collecting user input like names, emails, messages, or search queries.',
@@ -66,7 +66,7 @@ class GenerativeTextField extends StatelessWidget {
     },
     exampleJson:
         '{"labelText": "Email Address", "hintText": "Enter your email"}',
-    builder: (context) => GenerativeTextField(
+    builder: (context) => StreamingTextField(
       labelText: Stream.value('Email Address'),
       hintText: Stream.value('Enter your email'),
     ),
@@ -113,24 +113,10 @@ class GenerativeTextField extends StatelessWidget {
                       width: 2,
                     ),
                   ),
-                  labelStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 16,
-                  ),
-                  hintStyle: TextStyle(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                    fontSize: 16,
-                  ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
+                    horizontal: 16,
+                    vertical: 12,
                   ),
-                ),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             );

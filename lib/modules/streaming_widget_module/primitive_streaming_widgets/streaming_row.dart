@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-import 'generative_widget_info.dart';
+import 'streaming_widget_info.dart';
 
-class GenerativeRow extends StatelessWidget {
+class StreamingRow extends StatelessWidget {
   final dynamic itemComponents; // TODO: Change to MapPropertyStream (array)
   final Stream<double> gapNumber;
 
-  GenerativeRow({
+  StreamingRow({
     super.key,
     String? fullJson,
     this.itemComponents,
@@ -44,7 +44,7 @@ class GenerativeRow extends StatelessWidget {
     return stream ?? Stream.value(defaultValue);
   }
 
-  static final info = GenerativeWidgetInfo(
+  static final info = StreamingWidgetInfo(
     title: 'Row Layout',
     purpose:
         'Horizontal layout stack component. Use for arranging content horizontally like button groups, tags, or inline elements.',
@@ -54,8 +54,8 @@ class GenerativeRow extends StatelessWidget {
       'gapNumber': 'Number - Spacing between items in pixels',
     },
     exampleJson:
-        '{"itemComponents": [{"type": "GenerativeFilledButton", "labelText": "Yes"}, {"type": "GenerativeElevatedButton", "labelText": "No"}], "gapNumber": 12}',
-    builder: (context) => GenerativeRow(
+        '{"itemComponents": [{"type": "StreamingFilledButton", "labelText": "Yes"}, {"type": "StreamingElevatedButton", "labelText": "No"}], "gapNumber": 12}',
+    builder: (context) => StreamingRow(
       gapNumber: Stream.value(12.0),
       // Placeholder for visual representation in catalog since we can't easily mock children yet
     ),

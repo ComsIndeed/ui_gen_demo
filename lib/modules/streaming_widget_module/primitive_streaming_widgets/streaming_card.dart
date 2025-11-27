@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class GenerativeCard extends StatelessWidget {
+class StreamingCard extends StatelessWidget {
   final dynamic itemComponent; // TODO: Change to MapPropertyStream
 
-  GenerativeCard({super.key, String? fullJson, this.itemComponent}) {
+  StreamingCard({super.key, String? fullJson, this.itemComponent}) {
     if (fullJson != null && itemComponent != null) {
       throw ArgumentError(
         'Cannot provide both fullJson and individual streams',
@@ -21,7 +21,7 @@ Card container component.
 Properties:
 - itemComponent: Object - Component object to display inside the card
 
-Example: {"itemComponent": {"type": "GenerativeText", "displayText": "Card content"}}
+Example: {"itemComponent": {"type": "StreamingText", "displayText": "Card content"}}
 Use for grouping related content, displaying summaries, or creating distinct visual sections.
 ''';
 
