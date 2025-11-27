@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:ui_gen_demo/constants/app_constants.dart';
+import 'package:ui_gen_demo/constants/app_routes.dart';
+import 'package:ui_gen_demo/pages/homepage/app_title.dart';
 import 'package:ui_gen_demo/services/chat_view_provider.dart';
 import 'package:ui_gen_demo/services/ai_service.dart';
 
@@ -79,22 +81,16 @@ class _DrawerViewState extends State<DrawerView> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      AppConstants.appTitle,
-                      style: GoogleFonts.roboto(
-                        fontSize: 32,
-                        color: Colors.white,
-                      ),
-                    ),
+                    AppTitle(scale: 0.6),
                     Spacer(),
                     IconButton(
                       onPressed: () =>
-                          Navigator.pushNamed(context, '/widget_catalog'),
+                          Navigator.pushNamed(context, AppRoutes.widgetCatalog),
                       icon: Icon(Icons.list_alt),
                     ),
                     IconButton(
                       onPressed: () =>
-                          Navigator.pushNamed(context, '/settings'),
+                          Navigator.pushNamed(context, AppRoutes.settings),
                       icon: Icon(Icons.settings),
                     ),
                     IconButton(

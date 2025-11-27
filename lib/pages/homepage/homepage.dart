@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:ui_gen_demo/constants/app_constants.dart';
+import 'package:ui_gen_demo/pages/homepage/app_title.dart';
 import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dart';
 
 class Homepage extends StatelessWidget {
@@ -24,12 +25,8 @@ class Homepage extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          children: [
-            Text(
-              AppConstants.appTitle,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [AppTitle()],
         ),
       ),
     );

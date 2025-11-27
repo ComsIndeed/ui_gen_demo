@@ -3,9 +3,11 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:ui_gen_demo/constants/app_constants.dart';
+import 'package:ui_gen_demo/constants/app_routes.dart';
 import 'package:ui_gen_demo/pages/homepage/homepage.dart';
 import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dart';
 import 'package:ui_gen_demo/pages/settings_page/settings_page.dart';
+import 'package:ui_gen_demo/pages/widget_catalog_page/widget_catalog_page.dart';
 import 'package:ui_gen_demo/services/chat_view_provider.dart';
 
 void main() async {
@@ -35,10 +37,12 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData.dark(),
-      initialRoute: '/',
+      initialRoute: AppRoutes.home,
       routes: {
-        '/': (context) => const AnimatedDrawerWrapper(child: Homepage()),
-        '/settings': (context) => const SettingsPage(),
+        AppRoutes.home: (context) =>
+            const AnimatedDrawerWrapper(child: Homepage()),
+        AppRoutes.settings: (context) => const SettingsPage(),
+        AppRoutes.widgetCatalog: (context) => const WidgetCatalogPage(),
       },
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
