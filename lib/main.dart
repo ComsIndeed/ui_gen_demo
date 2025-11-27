@@ -8,8 +8,6 @@ import 'package:ui_gen_demo/pages/homepage/chat_view/animated_drawer_wrapper.dar
 import 'package:ui_gen_demo/pages/settings_page/settings_page.dart';
 import 'package:ui_gen_demo/services/chat_view_provider.dart';
 
-import 'package:ui_gen_demo/pages/widget_catalog_page/widget_catalog_page.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -41,7 +39,6 @@ class MainApp extends StatelessWidget {
       routes: {
         '/': (context) => const AnimatedDrawerWrapper(child: Homepage()),
         '/settings': (context) => const SettingsPage(),
-        '/widget_catalog': (context) => const WidgetCatalogPage(),
       },
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
