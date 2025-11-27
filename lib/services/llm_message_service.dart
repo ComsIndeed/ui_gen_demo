@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:llm_json_stream/classes/json_stream_parser.dart';
-import 'package:llm_json_stream/json_stream_parser.dart';
+import 'package:llm_json_stream/llm_json_stream.dart';
 import 'package:ui_gen_demo/pages/homepage/chat_view/message_box.dart';
 import 'package:ui_gen_demo/widgets/accumulating_stream_builder.dart';
 
