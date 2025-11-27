@@ -1,7 +1,7 @@
 name: ui_gen_demo
 description: "Generative UI demo app using Flutter"
 publish_to: 'none'
-version: 0.1.2
+version: 0.1.3
 
 environment:
   sdk: ^3.9.2
